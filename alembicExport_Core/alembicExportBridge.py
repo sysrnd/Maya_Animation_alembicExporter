@@ -1,4 +1,4 @@
-from PySide2 import QtCore, QtGui, QtWidgets
+from Modules.Qt import QtCore, QtGui, QtWidgets
 import Animacion.Maya_Animation_alembicExporter.alembicExport_Core.alembicExport
 reload(Animacion.Maya_Animation_alembicExporter.alembicExport_Core.alembicExport)
 from Animacion.Maya_Animation_alembicExporter.alembicExport_Core.alembicExport import *#import alembicExport
