@@ -27,22 +27,7 @@ class alembicExport(object):
 		#fileName = fileName.strip('RG_')
 		return fileName
 
-	def dirAlembic(self, sceneDir=FILE, taskFolderString = 'ANIMACION'):
-		'''
-		Checks if folder "ALEMBICS" exist, if it doesn't creates a new one
-		'''
 
-		if taskFolderString not in sceneDir:
-			cmds.warning( 'La carpeta \"' + str(taskFolderString) + '\" no fue encontrada' )
-		else:
-			if not os.path.exists(sceneDir + 'ALEMBICS'):
-				abcDir = os.mkdir(sceneDir + 'ALEMBICS')
-				#cmds.warning("La carpeta \"ALEMBICS\" no existia y fue creada")
-			else:
-				#print "Se encontro la carpeta \"ALEMBICS\"",
-				abcDir = sceneDir + 'ALEMBICS/'
-
-			return abcDir
 	def getNamespace(self, ref):
 		'''
 		'''
@@ -77,33 +62,28 @@ class alembicExport(object):
 		ignoreGeoList = ['BS', 'WRAP', 'BORRAR', 'Base']
 		refList = []
 
-		for geo in cmds.referenceQuery(ref, dp=True, nodes=True):
-			if cmds.objectType(geo) == 'mesh':
-				
-				validgeo = True
+		for geo in cmds.referenceQuery(ref, dp=True, nodes=True, sdp=True):
+			
+			validgeo = True
+			
+			shapes = cmds.listRelatives(geo, s=True, f=True)
 
-				for nogeo in ignoreGeoList:
-					if geo.find(nogeo) != -1:
-						validgeo = False
-
-				transform = cmds.listRelatives(geo, parent=True, f=True)[0]
-				transformVis = cmds.getAttr(transform + '.visibility')
-
-				if transformVis == False:
+			if shapes != None:
+				if cmds.objectType(shapes[0]) != 'mesh':
 					validgeo = False
-				try:
-					parent = cmds.listRelatives(transform, parent=True, f=True)[0]
-					parentVis = cmds.getAttr(parent + '.visibility')
-					if parentVis == False:
-						validgeo = False
-				except:
-					pass
+				if len(shapes) < 1:
+					validgeo = False
+			else:
+				validgeo = False
 
-				shapes = cmds.listRelatives(transform, s=True)
 
-				if validgeo == True:
-					if len(shapes) > 1:
-						refList.append(transform)
+			for nogeo in ignoreGeoList:
+				if geo.find(nogeo) != -1:
+					validgeo = False
+
+			if validgeo == True:
+					parent = cmds.listRelatives(shapes[0], p=True, f=True)[0]
+					refList.append(parent)
 
 		return refList
 
@@ -129,7 +109,8 @@ class alembicExport(object):
 		'''
 		Deals with alembic export
 		'''
-		command = '"-frameRange ' + str(start) + " " + str(end) + ' -dataFormat ogawa' + str(root) + '-file \\"' + str(path) + str(abcFile) +'.abc\\"\"'
+		command = '"-frameRange ' + str(start) + " " + str(end) + ' -dataFormat ogawa ' + str(root) + '-file \\"' + str(path) + str(abcFile) +'.abc\\"\"'
+		print command
 		mel.eval('AbcExport -j' + str(command))
 	def parseRootString(self, geo):
 		'''
@@ -150,22 +131,7 @@ class alembicExport(object):
 	def selectGeoFromRef(self, ref):
 		geo = self.findGeo(ref)
 		cmds.select(geo)
-		print 'testiriiririr'
-		'''
-		geo = []
-		cmds.file(ref, sa=True)
-		sel = cmds.ls(sl=True, l=True)
-		cmds.select(cl=True)
-		for x in sel:
-			if cmds.objectType(x) == 'mesh':
-				if x.find('BS_') == -1:
-					if x.find('BORRAR') == -1:
-						if x.find('WRAP') == -1:
-							xParent = cmds.listRelatives(x, p=True, f=True)[0]
-							geo.append(xParent)
 
-		cmds.select(geo)
-		'''
 
 	def clearSel(self):
 		cmds.select(cl=True)
