@@ -74,42 +74,39 @@ class alembicExport(object):
 
 		Ignores blendshapes, wraps and wires by checking if it finds them from a list
 		'''
-		ignoreGeoList = ['BS', 'WRAP', 'BORRAR']
+		ignoreGeoList = ['BS', 'WRAP', 'BORRAR', 'Base']
 		refList = []
 
 		for geo in cmds.referenceQuery(ref, dp=True, nodes=True):
 			if cmds.objectType(geo) == 'mesh':
 				
 				validgeo = True
+
 				for nogeo in ignoreGeoList:
 					if geo.find(nogeo) != -1:
 						validgeo = False
 
 				transform = cmds.listRelatives(geo, parent=True, f=True)[0]
 				transformVis = cmds.getAttr(transform + '.visibility')
+
 				if transformVis == False:
 					validgeo = False
 				try:
 					parent = cmds.listRelatives(transform, parent=True, f=True)[0]
-					grandParent = cmds.listRelatives(parent, parent=True, f=True)[0]
 					parentVis = cmds.getAttr(parent + '.visibility')
-					grandparentVis = cmds.getAttr(grandParent + '.visibility')
 					if parentVis == False:
 						validgeo = False
 				except:
 					pass
 
+				shapes = cmds.listRelatives(transform, s=True)
+
 				if validgeo == True:
-					refList.append(transform)
-			'''
-			try:
-					geoParent = cmds.listRelatives(geo, parent=True, f=True)[0]
-					if geoParent not in refList:
-			except:
-				pass
-			'''
+					if len(shapes) > 1:
+						refList.append(transform)
 
 		return refList
+
 	def loadAbcPlugin(self):
 		'''
 		Checks if plugin AbcExport is loaded to avoid any errors
@@ -151,6 +148,10 @@ class alembicExport(object):
 			return path_[0]
 
 	def selectGeoFromRef(self, ref):
+		geo = self.findGeo(ref)
+		cmds.select(geo)
+		print 'testiriiririr'
+		'''
 		geo = []
 		cmds.file(ref, sa=True)
 		sel = cmds.ls(sl=True, l=True)
@@ -164,6 +165,7 @@ class alembicExport(object):
 							geo.append(xParent)
 
 		cmds.select(geo)
+		'''
 
 	def clearSel(self):
 		cmds.select(cl=True)
