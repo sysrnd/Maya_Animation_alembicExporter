@@ -49,3 +49,5 @@ if __name__ != "__main__":
 		sys.exit(app.exec_())
 	except:
 		"error al intentar salir"
+
+print 'updated'
