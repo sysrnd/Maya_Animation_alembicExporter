@@ -110,7 +110,6 @@ class alembicExport(object):
 		Deals with alembic export
 		'''
 		command = '"-frameRange ' + str(start) + " " + str(end) + ' -dataFormat ogawa ' + str(root) + '-file \\"' + str(path) + str(abcFile) +'.abc\\"\"'
-		print command
 		mel.eval('AbcExport -j' + str(command))
 	def parseRootString(self, geo):
 		'''
