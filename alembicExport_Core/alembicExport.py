@@ -7,6 +7,8 @@ class alembicExport(object):
 	def __init__(self):
 		self.refs = []
 
+		self.listType = []
+
 	def main(self, ref, start, end, path):
 
 		abcDir = path + '/'
@@ -21,10 +23,12 @@ class alembicExport(object):
 
 
 	def alembicName(self, ref, geo):
+		'''
 		fileName = geo.split('|')[-1].rpartition(':')[0]
 		fileName += '_'
 		fileName += cmds.file(q=True, sn=True).split('/')[-1].split('.')[-2]
-		#fileName = fileName.strip('RG_')
+		'''
+		fileName = 'test'
 		return fileName
 
 
@@ -67,20 +71,28 @@ class alembicExport(object):
 			validgeo = True
 			
 			shapes = cmds.listRelatives(geo, s=True, f=True)
-
 			if shapes != None:
 				if cmds.objectType(shapes[0]) != 'mesh':
 					validgeo = False
+				else:
+					#check for visibility 
+					if self.checkVis_Recursive(geo) == False:
+						validgeo = False
+
+				#check to OrigShape existance
 				if len(shapes) < 1:
 					validgeo = False
 			else:
 				validgeo = False
 
-
+			#scan for invalid geo list
 			for nogeo in ignoreGeoList:
 				if geo.find(nogeo) != -1:
 					validgeo = False
 
+
+
+			#end validation process, appends to list
 			if validgeo == True:
 					parent = cmds.listRelatives(shapes[0], p=True, f=True)[0]
 					refList.append(parent)
@@ -134,3 +146,25 @@ class alembicExport(object):
 
 	def clearSel(self):
 		cmds.select(cl=True)
+
+	def checkVis_Recursive(self, obj):
+		objParent = cmds.listRelatives(obj, p=True, f=True)
+		
+		if type(objParent) == type(self.listType):
+			if objParent[0] != None:
+				vis = cmds.getAttr(objParent[0] + '.visibility')
+				if vis == False:
+					return vis
+				else:
+					self.checkVis_Recursive(objParent)
+		
+
+		'''
+		else:
+			objParent = cmds.listRelatives(obj, p=True, f=True)[0]
+
+			if objParent != None:
+				vis = self.checkVis_Recursive(objParent)
+			else:
+				return True
+		'''
