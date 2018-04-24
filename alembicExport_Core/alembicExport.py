@@ -24,11 +24,9 @@ class alembicExport(object):
 
 	def alembicName(self, ref, geo):
 		'''
-		fileName = geo.split('|')[-1].rpartition(':')[0]
-		fileName += '_'
-		fileName += cmds.file(q=True, sn=True).split('/')[-1].split('.')[-2]
+		name of the alembic file
 		'''
-		fileName = 'test'
+		fileName = cmds.file(ref, q=True, ns=True)
 		return fileName
 
 
@@ -46,8 +44,12 @@ class alembicExport(object):
 		'''
 		querys all reference paths
 		'''
+		invalidCameras = ['frontShape', 'sideShape', 'topShape', 'perspShape']
+		av = []
 
 		refs = (cmds.file(q=True, r=True))
+		#cameras = [cam for cam in cmds.ls(et='camera') if cam not in invalidCameras]
+		#av = cameras + refs
 		return refs
 
 	def changeNamespace(self, ref, newNs):
@@ -123,6 +125,7 @@ class alembicExport(object):
 		'''
 		command = '"-frameRange ' + str(start) + " " + str(end) + ' -dataFormat ogawa ' + str(root) + '-file \\"' + str(path) + str(abcFile) +'.abc\\"\"'
 		mel.eval('AbcExport -j' + str(command))
+
 	def parseRootString(self, geo):
 		'''
 
@@ -148,6 +151,9 @@ class alembicExport(object):
 		cmds.select(cl=True)
 
 	def checkVis_Recursive(self, obj):
+		'''
+		do it recurvively
+		'''
 		objParent = cmds.listRelatives(obj, p=True, f=True)
 		
 		if type(objParent) == type(self.listType):

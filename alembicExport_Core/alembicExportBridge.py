@@ -22,6 +22,8 @@ class alembicExportBridge(object):
 		self.btn_path.clicked.connect(self.getPath)
 		#self.window.resize(600, 300)
 
+		self.reg_ex = QtCore.QRegExp("[a-zA-Z0-9_]+")
+
 		#self.window.setFixedSize(500, 300)
 		self.lineEdits = []
 		self.checkBoxes = []	
@@ -57,6 +59,11 @@ class alembicExportBridge(object):
 				txt_nameSpace = QtWidgets.QLineEdit(nameSpace)
 				self.lineEdits.append(txt_nameSpace)
 				self.lyt_grid_references.addWidget(txt_nameSpace, grid, 1, 1, 1)
+
+				validator = QtGui.QRegExpValidator(self.reg_ex, txt_nameSpace)
+				txt_nameSpace.setValidator(validator)
+
+
 				#signal = checkBox.stateChanged.connect(self.testSignal)
 
 
