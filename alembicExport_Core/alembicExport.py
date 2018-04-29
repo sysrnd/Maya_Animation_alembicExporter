@@ -25,32 +25,50 @@ class alembicExport(object):
 	def alembicName(self, ref, geo):
 		'''
 		name of the alembic file
+		deprecated
 		'''
 		fileName = cmds.file(ref, q=True, ns=True)
 		return fileName
-
 
 	def getNamespace(self, ref):
 		'''
 		'''
 		namespace = cmds.file(ref, q=True, ns=True)
 		return namespace
-
+	
 	def setNamespace(self, ref, newNamespace):
 		'''
 		'''
 		return cmds.file(ref, e=True, ns=newNamespace)
+
+	def getNameCam(self, cam):
+
+		if cam.find(':') != -1:
+			return cam.split(':')[-1]
+		else:
+			return cam
+
+	def setNameCam(self, cam, newName):
+		if cam.find(':') != -1:
+			return cam.split(':')[-1]
+		else:
+			cmds.rename(cam, newName)
+
 	def findRefs(self):
 		'''
 		querys all reference paths
 		'''
-		invalidCameras = ['frontShape', 'sideShape', 'topShape', 'perspShape']
-		av = []
-
 		refs = (cmds.file(q=True, r=True))
-		#cameras = [cam for cam in cmds.ls(et='camera') if cam not in invalidCameras]
-		#av = cameras + refs
 		return refs
+
+	def findCams(self):
+		'''
+		query all referenced and non-referenced cams
+		'''
+		invalidCameras = ['frontShape', 'sideShape', 'topShape', 'perspShape']
+		cameras = [cmds.listRelatives(cam, p=True)[0] for cam in cmds.ls(et='camera') if cam not in invalidCameras]
+		return cameras
+
 
 	def changeNamespace(self, ref, newNs):
 		'''
@@ -123,7 +141,7 @@ class alembicExport(object):
 		'''
 		Deals with alembic export
 		'''
-		command = '"-frameRange ' + str(start) + " " + str(end) + ' -dataFormat ogawa ' + str(root) + '-file \\"' + str(path) + str(abcFile) +'.abc\\"\"'
+		command = '"-frameRange ' + str(start) + " " + str(end) + ' -uvWrite -dataFormat ogawa ' + str(root) + '-file \\"' + str(path) + str(abcFile) +'.abc\\"\"'
 		mel.eval('AbcExport -j' + str(command))
 
 	def parseRootString(self, geo):
@@ -163,14 +181,3 @@ class alembicExport(object):
 					return vis
 				else:
 					self.checkVis_Recursive(objParent)
-		
-
-		'''
-		else:
-			objParent = cmds.listRelatives(obj, p=True, f=True)[0]
-
-			if objParent != None:
-				vis = self.checkVis_Recursive(objParent)
-			else:
-				return True
-		'''
