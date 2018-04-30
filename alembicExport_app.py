@@ -9,16 +9,11 @@ import platform
 
 
 from Modules.Qt import QtCore, QtGui, QtWidgets
-import Animacion.Maya_Animation_alembicExporter.alembicExport_UI.alembicExportWindow_v03
+import Animacion.Maya_Animation_alembicExporter.alembicExport_UI.alembicExportWindow_v04
+reload(Animacion.Maya_Animation_alembicExporter.alembicExport_UI.alembicExportWindow_v04)
+from Animacion.Maya_Animation_alembicExporter.alembicExport_UI.alembicExportWindow_v04 import Ui_window_alembicExport
 
-
-reload(Animacion.Maya_Animation_alembicExporter.alembicExport_UI.alembicExportWindow_v03)
-from Animacion.Maya_Animation_alembicExporter.alembicExport_UI.alembicExportWindow_v03 import Ui_window_alembicExport
-
-
-import Animacion.Maya_Animation_alembicExporter.alembicExport_Core.alembicExportBridge
-
-
+import Animacion.Maya_Animation_alembicExporter.alembicExport_Core.alembicExportBridge	
 reload(Animacion.Maya_Animation_alembicExporter.alembicExport_Core.alembicExportBridge)
 from Animacion.Maya_Animation_alembicExporter.alembicExport_Core.alembicExportBridge import *#import alembicExportBridge
 
