@@ -11,11 +11,11 @@ from Modules.Qt import QtCore, QtGui, QtWidgets
 from functools import partial
 import getpass
 
-'''
+
 import Utils.Slack_sendMessage.MKF_SlackMessages
 reload(Utils.Slack_sendMessage.MKF_SlackMessages)
 from Utils.Slack_sendMessage.MKF_SlackMessages import Slack
-'''
+
 
 class alembicExportBridge(object):
 	def __init__(self, window):
