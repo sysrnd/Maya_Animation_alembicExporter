@@ -1,6 +1,6 @@
 import maya.cmds as cmds
 import maya.mel as mel
-import os
+
 class AlembicUtils():
 
 	@staticmethod
@@ -63,12 +63,6 @@ class alembicExportGral:
 		else:
 			return cam
 
-	def setNameObj(self, obj, newName):
-		if obj.find(':') != -1:
-			return obj.split(':')[-1]
-		else:
-			cmds.rename(obj, newName)
-
 	def findRefs(self):
 		'''
 		queries all reference paths
@@ -86,44 +80,18 @@ class alembicExportGral:
 		
 		mel.eval('AbcExport -j ' + str(command))
 
-	def getAlembicRoot(self, geometry):
-		'''
-
-		'''
-		root = ''
-		for geo in geometry:
-			if root != '':
-				geoSplitted = geo.split('|')
-				rootSplitted = root.split('|')
-
-				if len(geoSplitted) > len(rootSplitted):
-					root = self.getParent(geoSplitted, rootSplitted)
-				else:
-					root =self.getParent(rootSplitted, geoSplitted)
-			else:
-				root = geo
-
-		return root
-
-	def getParent(self, lengthyList, shortyList):
-		'''
-		getAlembicRoot method
-		'''
-		root = []
-
-		for geo in lengthyList:
-			if geo in shortyList:
-				root.append(geo)
-
-		root = '|'.join(root)
-		return root
-
-
 	def clearSel(self):
+
 		cmds.select(cl=True)
 
 	def selectObj(self, obj):
+
 		cmds.select(obj)
+
+	def selectShape(self, obj):
+		print obj
+		shape = cmds.listRelatives(obj, s=True, f=True)[0]
+		return shape
 
 	def checkVis_Recursive(self, obj):
 		'''
@@ -183,7 +151,44 @@ class alembicExportGeo(alembicExportGral):
 		geo = self.findGeo(ref)
 		cmds.select(geo)
 
+	def getAlembicRoot(self, geometry):
+		'''
+		Gets the common parent for all geometry 
+		'''
+		root = ''
+		for geo in geometry:
+			if root != '':
+				geoSplitted = geo.split('|')
+				rootSplitted = root.split('|')
+
+				if len(geoSplitted) > len(rootSplitted):
+					root = self.getParent(geoSplitted, rootSplitted)
+				else:
+					root =self.getParent(rootSplitted, geoSplitted)
+			else:
+				root = geo
+
+		return root
+
+	def getParent(self, lengthyList, shortyList):
+		'''
+		getAlembicRoot submethod
+		'''
+		root = []
+
+		for geo in lengthyList:
+			if geo in shortyList:
+				root.append(geo)
+
+		root = '|'.join(root)
+		return root
+
 class alembicExportCams(alembicExportGral):
+
+	def main(self, cam, start, end, path, fileName):
+		
+		camShape = self.selectShape(cam)
+		self.exportAbc(camShape, cam, path, fileName, start, end) 
 
 	def findCams(self):
 		'''
@@ -200,8 +205,3 @@ class alembicExportCams(alembicExportGral):
 		else:
 			return cam
 
-	def setNameCam(self, cam, newName):
-		if cam.find(':') != -1:
-			return cam.split(':')[-1]
-		else:
-			cmds.rename(cam, newName)

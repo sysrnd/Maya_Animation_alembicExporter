@@ -1,3 +1,9 @@
+#TODO: UPDATE STATUS BAR EXPORTED
+#GENERAL CLASS OPT
+#DEAL WITH MAIN IN CORE
+#FIX CHECKVISRECURSIVE AND SELF.LISTTYPE
+#FIX UI NAMES LAYOUT, ADD SELECTED TAB
+
 import Animacion.Maya_Animation_alembicExporter.alembicExport_Core.alembicExportGeneral 
 reload(Animacion.Maya_Animation_alembicExporter.alembicExport_Core.alembicExportGeneral)
 from Animacion.Maya_Animation_alembicExporter.alembicExport_Core.alembicExportGeneral import *
@@ -29,6 +35,7 @@ class alembicExportBridge(object):
 		self.reg_ex = QtCore.QRegExp("[a-zA-Z0-9_]+")
 
 		self.lineEdits = []
+		self.lineEditsCam = []
 		self.checkBoxes = []
 		self.checkBoxesCam = []
 
@@ -74,7 +81,7 @@ class alembicExportBridge(object):
 				grid += 1
 				#nameOrNameSpace = self.core.getNameCam(ref)
 				nameOrNameSpace = self.cam.getNameCam(cam)
-				self.createValidCheckbox(grid, nameOrNameSpace, self.window.verticalLayout, self.checkBoxesCam, self.lineEdits)
+				self.createValidCheckbox(grid, nameOrNameSpace, self.window.verticalLayout, self.checkBoxesCam, self.lineEditsCam)
 
 		for num in range(0, len(self.checkBoxes)):
 			'''
@@ -113,15 +120,18 @@ class alembicExportBridge(object):
 
 		avCheckBoxes = self.checkBoxes + self.checkBoxesCam
 
-		for x in xrange(0, len(avCheckBoxes)):
-			if avCheckBoxes[x].isChecked() == True:
-				if avCheckBoxes[x] in self.checkBoxes:
-					#PROBLEMATIC
-					print self.refs[x]
-					self.geo.setNamespace(self.refs[x], self.lineEdits[x].text())
-					self.geo.main(self.refs[x], start, end, path, self.lineEdits[x].text())
-
+		for x in xrange(0, len(self.checkBoxes)):
+			if self.checkBoxes[x].isChecked() == True:
+				self.geo.setNamespace(self.refs[x], self.lineEdits[x].text())
+				self.geo.main(self.refs[x], start, end, path, self.lineEdits[x].text())
 				checkedRefs += self.lineEdits[x].text() + ', '
+
+		self.cams = self.cam.findCams()
+
+		for y in xrange(0, len(self.checkBoxesCam)):
+			if self.checkBoxesCam[y].isChecked() == True:
+				self.cam.main(self.cams[y], start, end, path, self.lineEditsCam[y].text())
+				checkedRefs += self.lineEdits[y].text() + ', '
 
 
 		if checkedRefs != '':
@@ -146,13 +156,47 @@ class alembicExportBridge(object):
 		else:
 			self.geo.clearSel()
 
+		self.countLabel()
+
 	def camSelectSignal(self, num):
 		state = self.checkBoxesCam[num].isChecked()
 		if state == True:
-			self.cam.selectCam(self.cams[num])
+			self.cam.selectObj(self.cams[num])
 
 		else:
 			self.cam.clearSel()
+
+		self.countLabel()
+
+	def countLabel(self):
+
+		statusStr = ''
+
+		avCheckBoxes = self.checkBoxes + self.checkBoxesCam
+
+		reference = False
+		cameras = False
+
+		count = 0
+		for cb in self.checkBoxes:
+			if cb.isChecked():
+				reference = True
+				count += 1
+
+
+		countCam = 0
+		for cbCam in self.checkBoxesCam:
+			if cbCam.isChecked():
+				cameras = True
+				countCam += 1 
+
+		if reference == True:
+			statusStr += str(count) + ' references to export '
+
+		if cameras == True:
+			statusStr += '' + str(countCam) + ' cams to export'
+
+		self.window.lbl_status.setText(statusStr)
 
 	def readLocalInfo(self, file, text):
 		if os.path.exists(file + '.mkf'):
