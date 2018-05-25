@@ -10,6 +10,7 @@ from Animacion.Maya_Animation_alembicExporter.alembicExport_Core.alembicExportGe
 from Modules.Qt import QtCore, QtGui, QtWidgets
 from functools import partial
 import getpass
+import os
 
 
 import Utils.Slack_sendMessage.MKF_SlackMessages
@@ -138,7 +139,7 @@ class alembicExportBridge(object):
 			try:
 				user = getpass.getuser()
 				self.slack = Slack()
-				self.slack.MessageSlack(Message = 'Alembics *' + checkedRefs + '* guardado en la ruta: *' + path + '* del usuario `' + user + '`', channel = 'rnd')
+				self.slack.MessageSlack(Message = 'Alembics *' + checkedRefs + '* guardado en la ruta: *' + path + '* del usuario `' + user + '`', channel = 'alembics')
 			except:
 				pass
 
@@ -200,7 +201,7 @@ class alembicExportBridge(object):
 
 	def readLocalInfo(self, file, text):
 		if os.path.exists(file + '.mkf'):
-			with open(file + '.txt' ,'r') as f:
+			with open(file + '.mkf' ,'r') as f:
 				data = f.read()
 			text.setText(data)
 			return True

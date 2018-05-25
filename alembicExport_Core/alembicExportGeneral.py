@@ -74,7 +74,7 @@ class alembicExportGral:
 		'''
 		Deals with alembic export
 		'''
-		cmds.select(geo)
+		cmds.select(geo, root)
 		cmds.refresh()
 		command = '"-frameRange ' + str(start) + " " + str(end) + ' -sl -uvWrite -dataFormat ogawa -root ' + str(root) + ' -file \\"' + str(path) + str(abcFile) +'.abc\\"\"'
 		
@@ -89,7 +89,6 @@ class alembicExportGral:
 		cmds.select(obj)
 
 	def selectShape(self, obj):
-		print obj
 		shape = cmds.listRelatives(obj, s=True, f=True)[0]
 		return shape
 
@@ -98,7 +97,13 @@ class alembicExportGral:
 		do it recurvively
 		'''
 		objParent = cmds.listRelatives(obj, p=True, f=True)
+		try:
+			vis = cmds.getAttr(obj + '.visibility')
+			return vis
+		except:
+			return False
 		
+		'''
 		if type(objParent) == type(self.listType):
 			if objParent[0] != None:
 				vis = cmds.getAttr(objParent[0] + '.visibility')
@@ -106,6 +111,7 @@ class alembicExportGral:
 					return vis
 				else:
 					self.checkVis_Recursive(objParent)
+		'''
 
 class alembicExportGeo(alembicExportGral):
 
@@ -121,7 +127,6 @@ class alembicExportGeo(alembicExportGral):
 		for geo in cmds.referenceQuery(ref, dp=True, nodes=True, sdp=True):
 			
 			validgeo = True
-			
 			shapes = cmds.listRelatives(geo, s=True, f=True)
 			if shapes != None:
 				if cmds.objectType(shapes[0]) != 'mesh':
