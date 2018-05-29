@@ -1,7 +1,4 @@
 #TODO: UPDATE STATUS BAR EXPORTED
-#GENERAL CLASS OPT
-#DEAL WITH MAIN IN CORE
-#FIX CHECKVISRECURSIVE AND SELF.LISTTYPE
 #FIX UI NAMES LAYOUT, ADD SELECTED TAB
 
 import Animacion.Maya_Animation_alembicExporter.alembicExport_Core.alembicExportGeneral 
@@ -11,7 +8,8 @@ from Modules.Qt import QtCore, QtGui, QtWidgets
 from functools import partial
 import getpass
 import os
-
+import subprocess
+import maya.cmds as cmds
 
 import Utils.Slack_sendMessage.MKF_SlackMessages
 reload(Utils.Slack_sendMessage.MKF_SlackMessages)
@@ -43,11 +41,51 @@ class alembicExportBridge(object):
 		self.core = alembicExportGral()
 		self.geo = alembicExportGeo()
 		self.cam = alembicExportCams()
+		self.sel = alembicExportSel()
 
 		self.initialInfo()
 		self.populateUI()
 
+		self.SCRIPT_JOB_NUMBER = cmds.scriptJob( event=[ 'SelectionChanged', self.onSelectionChange ], protected=True )
+
+		#qt signals
+		self.window.tabs_widget.currentChanged.connect(self.changeTab)
+
+	def changeTab(self):
+
+		self.window.progressBar.setValue(0)
+
+		if len(self.checkBoxesCam) > 0:
+			for checkbox in self.checkBoxesCam:
+				checkbox.setChecked(False)
+
+		if len(self.checkBoxes) > 0:
+			for checkbox in self.checkBoxes:
+				checkbox.setChecked(False)
+
+		AlembicUtils().clearSel()
+
+
+	def returnScriptJob(self):
+		return self.SCRIPT_JOB_NUMBER
+
+	def onSelectionChange(self):
+
+		selClass = alembicExportSel()
+		sel = selClass.getSel()
+
+		self.window.list_currentSel.clear()
+		
+		if sel:
+			for x in sel:
+				self.window.list_currentSel.addItem(x)
+
+
+
+
 	def initialInfo(self):
+
+		self.window.progressBar.setValue(0)
 
 		self.window.txt_startFrame.setText(str(self.startEnd[0]))
 		self.window.txt_endFrame.setText(str(self.startEnd[1]))
@@ -72,7 +110,7 @@ class alembicExportBridge(object):
 				#referenced files
 				grid += 1
 				nameSpace = self.geo.getNamespace(ref)
-				self.createValidCheckbox(grid, nameSpace, self.window.lyt_vertical_geo, self.checkBoxes, self.lineEdits)
+				self.createValidCheckbox(grid, nameSpace, self.window.lyt_grid_geo, self.checkBoxes, self.lineEdits)
 
 		grid = 0
 
@@ -108,7 +146,7 @@ class alembicExportBridge(object):
 	def exportAlembic(self):
 		'''
 		'''
-
+		self.window.progressBar.setValue(0)
 		#for slack purposes
 		checkedRefs = ''
 
@@ -116,23 +154,40 @@ class alembicExportBridge(object):
 		end = str(self.window.txt_endFrame.text())
 		path = self.window.txt_path.text()
 
+		#progressBar
+		TOTAL = 100
+		PARTIAL = 0
+
 		self.writeLocalInfo(self.path + 'abcPath', self.window.txt_path.text())
 
 
 		avCheckBoxes = self.checkBoxes + self.checkBoxesCam
+		
+		if len(self.checkBoxes) > 0:
+			PARTIAL = len(self.checkBoxes)
+		elif len(self.checkBoxesCam):
+			PARTIAL = len(self.checkBoxesCam)
 
 		for x in xrange(0, len(self.checkBoxes)):
 			if self.checkBoxes[x].isChecked() == True:
 				self.geo.setNamespace(self.refs[x], self.lineEdits[x].text())
 				self.geo.main(self.refs[x], start, end, path, self.lineEdits[x].text())
 				checkedRefs += self.lineEdits[x].text() + ', '
+				CURRENT = TOTAL / PARTIAL * (x + 1)
+				self.window.progressBar.setValue(CURRENT)
 
 		self.cams = self.cam.findCams()
 
 		for y in xrange(0, len(self.checkBoxesCam)):
 			if self.checkBoxesCam[y].isChecked() == True:
 				self.cam.main(self.cams[y], start, end, path, self.lineEditsCam[y].text())
-				checkedRefs += self.lineEdits[y].text() + ', '
+				checkedRefs += self.lineEditsCam[y].text() + ', '
+
+				CURRENT = TOTAL / PARTIAL * (x + 1)
+				self.window.progressBar.setValue(CURRENT)
+
+		if self.window.list_currentSel.count() > 0:
+			self.sel.main(start, end, path)
 
 
 		if checkedRefs != '':
@@ -140,15 +195,20 @@ class alembicExportBridge(object):
 				user = getpass.getuser()
 				self.slack = Slack()
 				self.slack.MessageSlack(Message = 'Alembics *' + checkedRefs + '* guardado en la ruta: *' + path + '* del usuario `' + user + '`', channel = 'alembics')
+
 			except:
 				pass
 
+0
 
 	def getPath(self):
 		path = AlembicUtils().path()
 		self.window.txt_path.setText(path)
 
 	def geoSelectSignal(self, num):
+
+		self.window.progressBar.setValue(0)
+
 		state = self.checkBoxes[num].isChecked()
 
 		if state == True:
@@ -160,6 +220,9 @@ class alembicExportBridge(object):
 		self.countLabel()
 
 	def camSelectSignal(self, num):
+
+		self.window.progressBar.setValue(0)
+
 		state = self.checkBoxesCam[num].isChecked()
 		if state == True:
 			self.cam.selectObj(self.cams[num])
@@ -200,6 +263,7 @@ class alembicExportBridge(object):
 		self.window.lbl_status.setText(statusStr)
 
 	def readLocalInfo(self, file, text):
+
 		if os.path.exists(file + '.mkf'):
 			with open(file + '.mkf' ,'r') as f:
 				data = f.read()
@@ -209,8 +273,6 @@ class alembicExportBridge(object):
 			return False
 
 	def writeLocalInfo(self, file, text):
-		print '#####'
-		print file
 		with open(file + '.mkf','w') as f:
 
 			data = f.write(text)

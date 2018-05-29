@@ -30,6 +30,10 @@ class AlembicUtils():
 		if path_:
 			return path_[0] + '/'
 
+	@staticmethod
+	def clearSel():
+		cmds.select(cl=True)
+
 class alembicExportGral:
 	def __init__(self):
 		
@@ -76,7 +80,7 @@ class alembicExportGral:
 		'''
 		cmds.select(geo, root)
 		cmds.refresh()
-		command = '"-frameRange ' + str(start) + " " + str(end) + ' -sl -uvWrite -dataFormat ogawa -root ' + str(root) + ' -file \\"' + str(path) + str(abcFile) +'.abc\\"\"'
+		command = '"-frameRange ' + str(start) + " " + str(end) + ' -worldSpace -sl -uvWrite -dataFormat ogawa -root ' + str(root) + ' -file \\"' + str(path) + str(abcFile) +'.abc\\"\"'
 		
 		mel.eval('AbcExport -j ' + str(command))
 
@@ -210,3 +214,25 @@ class alembicExportCams(alembicExportGral):
 		else:
 			return cam
 
+class alembicExportSel(alembicExportGral, alembicExportGeo):
+	
+	def main(self, start, end, path):
+		selShapes = []
+
+		selLong = cmds.ls(sl=True, l=True)
+		selName = cmds.ls(sl=True)[0].split(':')[-1]
+
+		for s in selLong:
+			sShape = cmds.listRelatives(s, s=True, f=True)[0]
+			selShapes.append(sShape)
+
+		selRoot = self.getAlembicRoot(selLong)
+
+		self.exportAbc(selShapes, selRoot, path, selName, start, end)
+
+		cmds.select(selLong)
+
+	def getSel(self):
+		
+		sel = cmds.ls(sl=True)
+		return sel
