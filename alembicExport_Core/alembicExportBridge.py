@@ -165,7 +165,7 @@ class alembicExportBridge(object):
                 self.window.progressBar.setValue(100)
             except:
                 pass
-
+        if window.chkBox_fileExplorer.isChecked():
             os.startfile(path)
 
 
