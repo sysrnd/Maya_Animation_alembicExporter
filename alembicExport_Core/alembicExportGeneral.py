@@ -80,7 +80,7 @@ class alembicExportGral:
 		'''
 		cmds.select(geo, root)
 		cmds.refresh()
-		command = '"-frameRange ' + str(start) + " " + str(end) + ' -worldSpace -sl -uvWrite -dataFormat ogawa -root ' + str(root) + ' -file \\"' + str(path) + str(abcFile) +'.abc\\"\"'
+		command = '"-frameRange ' + str(start) + " " + str(end) + ' -worldSpace -writeVisibility -sl -uvWrite -dataFormat ogawa -root ' + str(root) + ' -file \\"' + str(path) + str(abcFile) +'.abc\\"\"'
 		
 		mel.eval('AbcExport -j ' + str(command))
 
