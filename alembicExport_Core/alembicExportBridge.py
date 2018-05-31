@@ -151,7 +151,7 @@ class alembicExportBridge(object):
                 self.cam.main(self.cams[y], start, end, path, self.lineEditsCam[y].text())
                 checkedRefs += self.lineEditsCam[y].text() + ', '
 
-                CURRENT = TOTAL / PARTIAL * (x + 1)
+                CURRENT = TOTAL / PARTIAL * (y + 1)
                 self.window.progressBar.setValue(CURRENT)
 
         if self.window.list_currentSel.count() > 0 and self.window.tabs_widget.currentIndex() == 2:
