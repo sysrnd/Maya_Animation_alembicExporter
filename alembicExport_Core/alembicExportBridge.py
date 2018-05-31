@@ -39,7 +39,7 @@ class alembicExportBridge(object):
         self.sel = alembicExportSel()
         self.initialInfo()
         self.populateUI()
-        self.SCRIPT_JOB_NUMBER = cmds.scriptJob( event=[ 'SelectionChanged', self.onSelectionChange ], protected=True )
+        #self.SCRIPT_JOB_NUMBER = cmds.scriptJob( event=[ 'SelectionChanged', self.onSelectionChange ], protected=True )
         #qt signals
         self.window.tabs_widget.currentChanged.connect(self.changeTab)
 
@@ -156,7 +156,7 @@ class alembicExportBridge(object):
 
         if self.window.list_currentSel.count() > 0 and self.window.tabs_widget.currentIndex() == 2:
             self.sel.main(start, end, path)
-            
+
         if checkedRefs != '':
             try:
                 user = getpass.getuser()

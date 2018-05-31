@@ -33,7 +33,7 @@ class MyApplication(QtWidgets.QMainWindow, Ui_window_alembicExport):
 
 	def closeEvent( self, event ):
 		print 'closed'
-		cmds.scriptJob( kill=self.interfaceMacho.returnScriptJob(), force=True )
+		#cmds.scriptJob( kill=self.interfaceMacho.returnScriptJob(), force=True )
 
 if __name__ != "__main__":
 	
