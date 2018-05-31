@@ -223,8 +223,11 @@ class alembicExportSel(alembicExportGral, alembicExportGeo):
 		selName = cmds.ls(sl=True)[0].split(':')[-1]
 
 		for s in selLong:
-			sShape = cmds.listRelatives(s, s=True, f=True)[0]
-			selShapes.append(sShape)
+			try:
+				sShape = cmds.listRelatives(s, s=True, f=True)[0]
+				selShapes.append(sShape)
+			except:
+				pass
 
 		selRoot = self.getAlembicRoot(selLong)
 

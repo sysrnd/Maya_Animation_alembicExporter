@@ -52,6 +52,7 @@ class alembicExportBridge(object):
         if len(self.checkBoxes) > 0:
             for checkbox in self.checkBoxes:
                 checkbox.setChecked(False)
+
         AlembicUtils().clearSel()
 
     def returnScriptJob(self):
@@ -152,8 +153,10 @@ class alembicExportBridge(object):
 
                 CURRENT = TOTAL / PARTIAL * (x + 1)
                 self.window.progressBar.setValue(CURRENT)
-        if self.window.list_currentSel.count() > 0:
+
+        if self.window.list_currentSel.count() > 0 and self.window.tabs_widget.currentIndex() == 2:
             self.sel.main(start, end, path)
+            
         if checkedRefs != '':
             try:
                 user = getpass.getuser()

@@ -333,7 +333,7 @@ class Ui_window_alembicExport(object):
 
         self.retranslateUi(window_alembicExport)
 
-        self.tabs_widget.setCurrentIndex(2)
+        self.tabs_widget.setCurrentIndex(0)
 
         QtCore.QMetaObject.connectSlotsByName(window_alembicExport)
 
