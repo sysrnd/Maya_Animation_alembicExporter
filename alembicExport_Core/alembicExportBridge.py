@@ -162,9 +162,11 @@ class alembicExportBridge(object):
                 user = getpass.getuser()
                 self.slack = Slack()
                 self.slack.MessageSlack(Message = 'Alembics *' + checkedRefs + '* guardado en la ruta: *' + path + '* del usuario `' + user + '`', channel = 'alembics')
+                self.window.progressBar.setValue(100)
             except:
                 pass
 
+            os.startfile(path)
 
 
     def getPath(self):
